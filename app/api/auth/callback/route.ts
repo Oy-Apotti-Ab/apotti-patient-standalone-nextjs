@@ -1,54 +1,42 @@
-import { NextResponse } from 'next/server';
-import fetch from 'node-fetch';
+import { NextRequest, NextResponse } from 'next/server';
+import axios from 'axios';
 import qs from 'qs';
 
-interface TokenResponse {
-  access_token: string;
-  patient: string;
-}
-
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const code = url.searchParams.get('code');
-
-  if (!code) {
-    return NextResponse.json({ error: 'Authorization code is required' }, { status: 400 });
-  }
-
-  const tokenEndpoint = `${process.env.NEXT_PUBLIC_FHIR_SERVER_A}/token`;
-  const redirectUri = 'http://localhost:3000/api/auth/callback';
+export async function POST(request: NextRequest) {
+  // Ensure the environment variables are defined
+  const tokenEndpoint = process.env.NEXT_PUBLIC_FHIR_SERVER_A;
   const clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
 
-  const tokenRequestBody = qs.stringify({
-    grant_type: 'authorization_code',
-    code,
-    redirect_uri: redirectUri,
-    client_id: clientId,
-  });
+  if (!tokenEndpoint || !clientId) {
+    return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
+  }
+
+  const body = await request.text();
+  const formData = qs.parse(body);
+
+  const code = formData.code;
 
   try {
-    const response = await fetch(tokenEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: tokenRequestBody,
-    });
+    const tokenResponse = await axios.post(
+      tokenEndpoint,
+      qs.stringify({
+        grant_type: 'authorization_code',
+        code,
+        client_id: clientId,
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
 
-    if (!response.ok) {
-      throw new Error('Failed to exchange authorization code for access token');
-    }
+    const { access_token } = tokenResponse.data;
+    console.log('Received access token:', access_token);
 
-    const tokenData = await response.json() as TokenResponse;
-    const { access_token, patient } = tokenData;
-
-    const redirectUrl = new URL('http://localhost:3000/');
-    redirectUrl.searchParams.append('accessToken', access_token);
-    redirectUrl.searchParams.append('patientId', patient);
-
-    return NextResponse.redirect(redirectUrl.toString());
+    return NextResponse.json({ access_token });
   } catch (error) {
-    console.error('Error exchanging authorization code for access token:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Error during OAuth2 token exchange:', error);
+    return NextResponse.json({ error: 'Failed to fetch token' }, { status: 500 });
   }
 }

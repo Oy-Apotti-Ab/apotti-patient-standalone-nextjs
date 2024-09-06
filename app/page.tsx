@@ -7,6 +7,8 @@ export default function HomePage() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [patientId, setPatientId] = useState<string | null>(null);
 
+  console.log('process.env.NEXT_PUBLIC_FHIR_SERVER_A', process.env.NEXT_PUBLIC_FHIR_SERVER_A);
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const accessToken = urlParams.get('accessToken');
@@ -19,8 +21,7 @@ export default function HomePage() {
   }, []);
 
   const handleSignIn = () => {
-    //const authorizeUrl = `${process.env.NEXT_PUBLIC_FHIR_SERVER_A}/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&redirect_uri=http://localhost:3000/api/auth/callback&scope=openid%20profile%20patient.read`;
-    const authorizeUrl = `${process.env.NEXT_PUBLIC_FHIR_SERVER_A}/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&redirect_uri=http://localhost:3000/callback&launch=YOUR_LAUNCH_ID`;
+    const authorizeUrl = `${process.env.NEXT_PUBLIC_FHIR_SERVER_A}/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&redirect_uri=http://localhost:3000/api/auth/callback&scope=openid%20profile%20patient.read`;
     window.location.href = authorizeUrl;
   };
 
@@ -32,7 +33,7 @@ export default function HomePage() {
         <div>
           <h2>Patient ID: {patientId}</h2>
           <Link href={`/patient?accessToken=${accessToken}&patientId=${patientId}`}>
-            <a>View Patient Data</a>
+            View Patient Data
           </Link>
         </div>
       )}
