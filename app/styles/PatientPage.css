@@ -1,5 +1,16 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: white;
+}
+
+
+/* body {
+  background: white;
+} */
 .container {
-  margin: 20px;
+  margin: 20px; 
 }
 
 .header {
@@ -14,11 +25,13 @@ h1 {
   color: black; /* Ensuring header text is black */
 }
 
+
 .patient-info,
 .observations-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
+  background-color: white;
 }
 
 .patient-info td,

@@ -1,6 +1,11 @@
+body {
+  background: white;
+    background-color: rgb(var(--foreground-rgb));
+  }
 .container {
     padding: 20px;
     text-align: center; /* Center the content */
+    background-color:white;
   }
   
   .image-container {
@@ -13,7 +18,7 @@
     color: black; /* Ensuring header text is black */
   }
   
-  .sign-in-button {
+  /* .sign-in-button {
     background-color: #0070f3;
     color: white;
     border: none;
@@ -26,5 +31,17 @@
   
   .sign-in-button:hover {
     background-color: #005bb5;
+  } */
+  .sign-in-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .sign-in-button:hover {
+    background-color: #45a049;
   }
   
