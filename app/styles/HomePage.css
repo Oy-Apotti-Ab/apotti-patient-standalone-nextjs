@@ -1,0 +1,30 @@
+.container {
+    padding: 20px;
+    text-align: center; /* Center the content */
+  }
+  
+  .image-container {
+    margin-bottom: 20px; /* Space between the image and the text */
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: black; /* Ensuring header text is black */
+  }
+  
+  .sign-in-button {
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .sign-in-button:hover {
+    background-color: #005bb5;
+  }
+  

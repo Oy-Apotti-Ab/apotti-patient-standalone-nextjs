@@ -2,32 +2,35 @@ import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 
 export async function GET(request: NextRequest, { params }: { params: { patientId: string } }) {
-  const { patientId } = params;
-  const FHIR_SERVER_URL = process.env.NEXT_PUBLIC_FHIR_SERVER!;
-  const accessToken = request.headers.get('Authorization')?.replace('Bearer ', '');
+  const FHIR_SERVER_URL = process.env.NEXT_PUBLIC_FHIR_SERVER;
+  const patientId = params.patientId; // Extract patientId from the route params
 
-  console.log('API route hit: /api/observation/[patientId]');
-  console.log('Received patientId:', patientId);
-  console.log('Extracted access token:', accessToken);
-  
+  // Extract the accessToken from the Authorization header
+  const accessToken = request.headers.get('Authorization')?.split(' ')[1]; 
+
+  console.log('FHIR_SERVER_URL',FHIR_SERVER_URL);
+  console.log('observation patientId:', patientId);
+  console.log('observation accessToken:', accessToken);
+
   if (!accessToken) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Missing access token' }, { status: 401 });
   }
 
   try {
-    const response = await axios.get(`${FHIR_SERVER_URL}/Observation?patient=${patientId}`, {
+
+    const response = await axios.get(`${FHIR_SERVER_URL}/Observation`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        Accept: 'application/json',
+      },
+      params: {
+        patient: patientId,
+        category: 'vital-signs', // Assuming this is part of the observation request
       },
     });
-
-    console.log('FHIR server response status:', response.status);
-    const observationData = response.data;
-
-    return NextResponse.json(observationData, { status: 200 });
-  } catch (error) {
+    //console.log('FHIR Server Response Data:', response.data);
+    return NextResponse.json(response.data);
+  } catch (error: any) {
     console.error('Error fetching observation data:', error);
-    return NextResponse.json({ error: 'Failed to fetch observation data' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch observations' }, { status: error.response?.status || 500 });
   }
 }

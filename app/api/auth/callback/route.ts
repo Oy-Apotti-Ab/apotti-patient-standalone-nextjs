@@ -1,28 +1,31 @@
-import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import qs from 'qs';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
-  // Ensure the environment variables are defined
-  const tokenEndpoint = process.env.NEXT_PUBLIC_FHIR_SERVER_A;
-  const clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
+export async function GET(request: NextRequest) {
+  console.log('inside GET');
 
-  if (!tokenEndpoint || !clientId) {
-    return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
+  const { searchParams } = new URL(request.url);
+  const code = searchParams.get('code');
+  
+  if (!code) {
+    return NextResponse.json({ error: 'Missing authorization code' }, { status: 400 });
   }
 
-  const body = await request.text();
-  const formData = qs.parse(body);
-
-  const code = formData.code;
+  const tokenEndpoint = process.env.NEXT_PUBLIC_FHIR_SERVER_A;
+  const clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
+  const redirectUri = 'http://localhost:3000/api/auth/callback';
+  const state = '1234';
 
   try {
     const tokenResponse = await axios.post(
-      tokenEndpoint,
+      `${tokenEndpoint}/token`,
       qs.stringify({
         grant_type: 'authorization_code',
         code,
+        redirect_uri: redirectUri,
         client_id: clientId,
+        state,
       }),
       {
         headers: {
@@ -31,12 +34,17 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    const { access_token } = tokenResponse.data;
-    console.log('Received access token:', access_token);
-
-    return NextResponse.json({ access_token });
+    const { access_token, patient } = tokenResponse.data;
+    return NextResponse.redirect(
+      `http://localhost:3000/patient/${patient}?accessToken=${access_token}`
+    );
+    
   } catch (error) {
-    console.error('Error during OAuth2 token exchange:', error);
-    return NextResponse.json({ error: 'Failed to fetch token' }, { status: 500 });
+    const axiosError = error as AxiosError;
+    const statusCode = axiosError.response?.status || 500;
+    const errorMessage = axiosError.response?.data || 'Internal server error';
+
+    console.error('Error exchanging authorization code for access token:', errorMessage);
+    return NextResponse.json({ error: 'Failed to fetch token' }, { status: statusCode });
   }
 }

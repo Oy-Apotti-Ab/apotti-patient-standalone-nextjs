@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 
+console.log('route.ts alkaa');
+
 export async function GET(request: NextRequest, { params }: { params: { patientId: string } }) {
   const { patientId } = params;
   const FHIR_SERVER_URL = process.env.NEXT_PUBLIC_FHIR_SERVER!;
