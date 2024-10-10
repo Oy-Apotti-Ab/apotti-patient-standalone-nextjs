@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code');
-  
+
   if (!code) {
     return NextResponse.json({ error: 'Missing authorization code' }, { status: 400 });
   }
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(
       `http://localhost:3000/patient/${patient}?accessToken=${access_token}`
     );
-    
+
   } catch (error) {
     const axiosError = error as AxiosError;
     const statusCode = axiosError.response?.status || 500;
